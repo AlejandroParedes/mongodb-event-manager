@@ -1,0 +1,26 @@
+{
+  "name": "mongo-learning",
+  "version": "1.0.0",
+  "description": "Learning the stream with mongo client",
+  "main": "main.ts",
+  "scripts": {
+    "start": "tsc && node dist/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mongo",
+    "typescript",
+    "database",
+    "stream"
+  ],
+  "author": "Alejandro Paredes",
+  "license": "MIT",
+  "dependencies": {
+    "@types/mongodb": "^4.0.7",
+    "mongodb": "^4.2.1",
+    "tslint": "^6.1.3"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.3"
+  }
+}
