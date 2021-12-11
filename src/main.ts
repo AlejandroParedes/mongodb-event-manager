@@ -1,49 +1,43 @@
-import {ChangeStream, Document, MongoClient} from "mongodb"
-import * as stream from "stream"
+import { ChangeStream, Document, MongoClient } from "mongodb";
 
+/**
+ * Entry point to start client and react to data
+ */
 async function main() {
-  const uri: string = "mongodb://localhost:27017/?readPreference=primary&directConnection=true&ssl=false";
+  const uri =
+    "mongodb://localhost:27017/?readPreference=primary&directConnection=true&ssl=false";
   const client: MongoClient = new MongoClient(uri);
   try {
     await client.connect();
-    console.log("already connected");
 
-    const pipeline: Document[] = [{
-      "$match": {
-        "operationType": "delete",
-      }
-    }];
-    await monitorListingsUsingStreamAPI(client, 600000,pipeline);
-  } finally {
-    console.log("error on connection");
-    await client.close();
+    const pipeline: Document[] = [
+      {
+        $match: {
+          operationType: "delete",
+        },
+      },
+    ];
+    await monitorListingsUsingStreamAPI(client, pipeline);
+  } catch (e) {
+    console.log(e);
   }
 }
 
 main().catch(console.error);
 
-function closeChangeStream(timeInMs: number, changeStream: any) {
-  return new Promise<void>((resolve) => {
-    setTimeout(() => {
-      console.log("closing the change stream");
-      changeStream.close();
-      resolve();
-    }, timeInMs)
-  });
-}
-
-async function monitorListingsUsingStreamAPI(client: MongoClient, timeInMs: number = 600000, pipeline: Document[] = []) {
+/**
+ * List collection changes
+ * @param {MongoClient} client - Client to listen events
+ * @param {Document[]} pipeline - Agregation to filter events
+ */
+async function monitorListingsUsingStreamAPI(
+  client: MongoClient,
+  pipeline: Document[] = []
+) {
   const collection = client.db("test").collection("user");
   const changeStream: ChangeStream = collection.watch(pipeline);
 
-  changeStream.stream().pipe(
-    new stream.Writable({
-      objectMode: true,
-      write: function (doc, _, cb) {
-        console.log(doc);
-        cb();
-      }
-    })
-  )
-  await closeChangeStream(timeInMs, changeStream)
+  changeStream.on("change", (change) => {
+    console.log(change);
+  });
 }
